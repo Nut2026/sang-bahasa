@@ -1,18 +1,14 @@
 import type { APIRoute } from "astro";
-import {
-  filterEntries,
-  getEntriesByWordType,
-  type KamusWordType,
-} from "../../../utils/kamus";
-import {
-  normalizeSearchInput,
-  partitionRankedSearch,
-  rankKamusEntries,
-} from "../../../utils/searchRank";
+import type { KamusWordType } from "../../../utils/kamus";
+import { getSupabaseClient } from "../../../utils/supabase";
 
 const DEFAULT_LIMIT = 5;
 
 export const prerender = false;
+
+function escapeLike(value: string): string {
+  return value.replace(/%/g, "\\%").replace(/_/g, "\\_");
+}
 
 export const GET: APIRoute = async ({ url }) => {
   const rawQuery = url.searchParams.get("q") ?? "";
@@ -23,21 +19,73 @@ export const GET: APIRoute = async ({ url }) => {
     Number(url.searchParams.get("limit") ?? DEFAULT_LIMIT) || DEFAULT_LIMIT
   );
 
-  const normalized = normalizeSearchInput(rawQuery);
-  if (normalized.length < 2) {
+  if (rawQuery.trim().length < 2) {
     return new Response(JSON.stringify([]), {
       headers: { "Content-Type": "application/json" },
     });
   }
 
   try {
-    const entries = await getEntriesByWordType(requestedWordType);
-    const pool = filterEntries(entries, { query: "" });
-    const ranked = rankKamusEntries(pool, rawQuery.trim());
-    const { matches, fallbackSuggestions } = partitionRankedSearch(ranked);
+    const client = getSupabaseClient();
+    const query = rawQuery.trim();
+    const likePattern = `%${escapeLike(query)}%`;
 
-    const ordered = matches.length > 0 ? matches : fallbackSuggestions;
-    const slice = ordered.slice(0, limit);
+    // Fetch suggestions directly from Supabase using ilike for speed
+    let peribahasaData: { phrase: string; slug: string; word_type?: string }[] | null = null;
+    let bahasaKlasikData: { phrase: string; slug: string; word_type?: string }[] | null = null;
+
+    if (requestedWordType === "all" || requestedWordType === "peribahasa") {
+      const { data, error } = await client
+        .from("peribahasa")
+        .select("phrase, slug")
+        .ilike("phrase", likePattern)
+        .limit(limit * 2);
+      if (error) throw error;
+      peribahasaData = (data ?? []).map((row) => ({
+        phrase: row.phrase,
+        slug: row.slug,
+        word_type: "peribahasa",
+      }));
+    }
+
+    if (requestedWordType === "all" || requestedWordType === "bahasa-klasik") {
+      const { data, error } = await client
+        .from("bahasa_klasik")
+        .select("phrase, slug")
+        .ilike("phrase", likePattern)
+        .limit(limit * 2);
+      if (error) throw error;
+      bahasaKlasikData = (data ?? []).map((row) => ({
+        phrase: row.phrase,
+        slug: row.slug,
+        word_type: "bahasa-klasik",
+      }));
+    }
+
+    // Merge results, deduplicate by phrase, and return top matches
+    const allResults = [
+      ...(peribahasaData ?? []),
+      ...(bahasaKlasikData ?? []),
+    ];
+
+    // Deduplicate by phrase (case-insensitive)
+    const seen = new Set<string>();
+    const unique = allResults.filter((item) => {
+      const key = item.phrase.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    // Sort by phrase match quality (starts with is better than contains)
+    unique.sort((a, b) => {
+      const aStarts = a.phrase.toLowerCase().startsWith(query.toLowerCase()) ? 1 : 0;
+      const bStarts = b.phrase.toLowerCase().startsWith(query.toLowerCase()) ? 1 : 0;
+      if (bStarts !== aStarts) return bStarts - aStarts;
+      return a.phrase.localeCompare(b.phrase, "ms");
+    });
+
+    const slice = unique.slice(0, limit);
 
     return new Response(JSON.stringify(slice), {
       headers: { "Content-Type": "application/json" },

@@ -10,8 +10,8 @@ export default defineConfig({
   // The Adapter tells Astro how to run on Vercel's servers
   adapter: vercel(),
 
-  // "static" is the default in Astro 6. 
-  // We handle dynamic search pages using 'export const prerender = false' 
+  // "static" is the default in Astro 6.
+  // We handle dynamic pages using 'export const prerender = false'
   // inside the specific .astro files.
   output: "static",
 
@@ -42,7 +42,6 @@ export default defineConfig({
         }
         
         // Exclude these as before
-        if (path.includes('/admin/')) return false;
         if (path.includes('/kamus/semua/')) return false;
         
         // Keep everything else, including /kamus/*/search

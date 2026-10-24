@@ -123,6 +123,12 @@ async function fetchFromTable<T>(
 }
 
 const FETCH_ALL_BATCH_SIZE = 1000;
+const FETCH_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const fetchCache = new Map<string, { data: unknown; expiry: number }>();
+
+function cacheKey(table: string, filters?: any): string {
+  return `${table}:${JSON.stringify(filters ?? {})}`;
+}
 
 async function fetchAllFromTable<T>(
   table: string,
@@ -133,6 +139,12 @@ async function fetchAllFromTable<T>(
     order?: { column: string; ascending?: boolean };
   }
 ): Promise<T[]> {
+  const key = cacheKey(table, filters);
+  const hit = fetchCache.get(key);
+  if (hit && hit.expiry > Date.now()) {
+    return hit.data as T[];
+  }
+
   const rows: T[] = [];
   let offset = 0;
 
@@ -152,6 +164,7 @@ async function fetchAllFromTable<T>(
     offset += FETCH_ALL_BATCH_SIZE;
   }
 
+  fetchCache.set(key, { data: rows, expiry: Date.now() + FETCH_CACHE_TTL_MS });
   return rows;
 }
 

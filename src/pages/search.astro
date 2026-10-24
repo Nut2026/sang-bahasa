@@ -4,7 +4,6 @@ export const prerender = false;
 import ResultCard from "../components/ResultCard.astro";
 import SearchNoMatchChampion from "../components/SearchNoMatchChampion.astro";
 import SearchBar from "../components/SearchBar.astro";
-import { ENDPOINTS, apiFetch } from "../config/apiConfig";
 import type {
   CategoryInfo,
   SearchResult,
@@ -13,6 +12,18 @@ import type {
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { resolveSearchResults } from "../utils/searchResults";
 import { getTopTrenDuniaSummaries } from "../utils/trenDunia";
+import {
+  getSupabaseClient,
+  type PeribahasaRow,
+  type BahasaKlasikRow,
+} from "../utils/supabase";
+import type { KamusEntrySummary } from "../utils/kamus";
+import {
+  filterEntries,
+  getEntriesByWordType,
+  paginateEntries,
+  mapRowToSummary,
+} from "../utils/kamus";
 
 const url = Astro.url;
 
@@ -29,8 +40,15 @@ let categories: CategoryInfo[] = [];
 let error = "";
 let similarEntries: PeribahasaSummary[] = [];
 
+// Fetch categories from Supabase directly
 try {
-  categories = await apiFetch<CategoryInfo[]>(ENDPOINTS.categories());
+  const client = getSupabaseClient();
+  const { data, error: catError } = await client
+    .from("categories")
+    .select("id, slug, name_ms, description_ms")
+    .order("name_ms", { ascending: true });
+  if (catError) throw catError;
+  categories = (data ?? []) as CategoryInfo[];
 } catch {
   categories = [];
 }
@@ -57,11 +75,27 @@ try {
       };
     }
   } else {
-    const fetchUrl = category
-      ? ENDPOINTS.entriesByCategory(category, page, PAGE_SIZE)
-      : ENDPOINTS.entries(page, PAGE_SIZE);
-
-    allEntries = await apiFetch<SearchResult>(fetchUrl);
+    // Fetch entries from Supabase directly using client-side search utilities
+    const entries = await getEntriesByWordType("all");
+    const filtered = filterEntries(entries, { category });
+    const pageSlice = paginateEntries(filtered, page, PAGE_SIZE);
+    allEntries = {
+      query: "",
+      total: filtered.length,
+      page,
+      page_size: PAGE_SIZE,
+      results: pageSlice.map((e) => ({
+        id: e.id,
+        phrase: e.phrase,
+        slug: e.slug,
+        meaning_ms: e.meaning_ms,
+        category: e.category,
+        tags: [],
+        word_type: e.word_type,
+        created_at: e.created_at,
+        _type: e._type,
+      })),
+    };
   }
 } catch {
   error = "Tidak dapat menghubungi pelayan. Sila cuba sebentar lagi.";
