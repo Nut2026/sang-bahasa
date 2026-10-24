@@ -1,0 +1,243 @@
+---
+interface Props {
+  initialValue?: string;
+  placeholder?: string;
+  hero?: boolean;
+  autofocus?: boolean;
+  wordType?: string;
+}
+
+const {
+  initialValue = "",
+  placeholder = "Cari sesuatu...",
+  hero = false,
+  autofocus = false,
+  wordType = "all",
+} = Astro.props;
+
+const searchUrl = wordType === "all" 
+  ? "/kamus/search" 
+  : wordType === "peribahasa" 
+    ? "/kamus/peribahasa/search" 
+    : wordType === "simpulan-bahasa" 
+      ? "/kamus/simpulan-bahasa/search" 
+      : wordType === "bahasa-klasik" 
+        ? "/kamus/bahasa-klasik/search" 
+        : "/kamus/search";
+---
+
+<div class="search-container" data-search-root data-word-type={wordType}>
+  <form class="search-form" action={searchUrl} method="get" role="search" data-search-form>
+    <div class="search-row">
+      <input
+        type="search"
+        name="q"
+        class="search-input"
+        placeholder={placeholder}
+        value={initialValue}
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Cari peribahasa"
+        aria-autocomplete="list"
+        aria-controls="search-results-listbox"
+        data-search-input
+        autofocus={autofocus}
+      />
+
+      <button type="submit" class="search-submit">
+        Cari
+      </button>
+    </div>
+
+    <div
+      id="search-results-listbox"
+      class="search-suggestions"
+      role="listbox"
+      aria-label="Cadangan carian"
+      data-search-suggestions
+    ></div>
+  </form>
+</div>
+
+<style is:global>
+.search-container {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  position: relative;
+  font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+.search-form {
+  width: 100%;
+}
+
+.search-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input {
+  flex: 1;
+  padding: 14px 24px;
+  /* Use a fixed pixel value for a perfect pill shape regardless of height */
+  border-radius: 100px !important; 
+  border: 2px solid #e5e7eb;
+  font-size: 16px;
+  background: white;
+  color: #111827;
+  /* Crucial: Disable browser's default focus ring */
+  outline: none !important;
+  /* Prevent OS-specific styling overrides */
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s ease;
+}
+
+/* Force the pill shape to remain during click/focus */
+.search-input:focus, 
+.search-input:active {
+  border-color: #2ecc71;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 100px !important;
+}
+
+.search-submit {
+  padding: 14px 28px;
+  border-radius: 100px;
+  border: none;
+  background: #2ecc71;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.search-submit:hover {
+  background: #27ae60;
+}
+
+/* Suggestion Panel Styling */
+.search-container .search-suggestions {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  right: 0;
+  background: #065f46;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  max-height: 380px;
+  overflow-y: auto;
+  display: none;
+  z-index: 999;
+  padding: 8px;
+  text-align: left;
+}
+
+.search-suggestions--visible {
+  display: block !important;
+}
+
+.result-item {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+  margin-bottom: 2px;
+}
+
+.result-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.peribahasa-text {
+  font-weight: 600;
+}
+</style>
+
+<script>
+  import { normalizeSearchInput } from "../utils/searchRank";
+
+  const roots = document.querySelectorAll("[data-search-root]");
+
+  roots.forEach((root) => {
+    const input = root.querySelector("[data-search-input]");
+    const panel = root.querySelector("[data-search-suggestions]");
+    if (!input || !panel) return;
+
+    let debounce: ReturnType<typeof setTimeout>;
+    let abortController: AbortController;
+
+    const close = () => {
+      panel.classList.remove("search-suggestions--visible");
+      panel.innerHTML = "";
+    };
+
+    const escapeHtml = (value: string) =>
+      String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+
+    const render = (items: { slug?: string; phrase?: string; word_type?: string }[] = []) => {
+      if (!items.length) return close();
+
+      panel.innerHTML = items
+        .map(
+          (i) =>
+            `<div class="result-item" role="option" data-slug="${escapeHtml(i.slug ?? "")}" data-type="${escapeHtml(i.word_type || "peribahasa")}"><span class="peribahasa-text">${escapeHtml(i.phrase ?? "")}</span></div>`
+        )
+        .join("");
+
+      panel.classList.add("search-suggestions--visible");
+
+      panel.querySelectorAll(".result-item").forEach((el) => {
+        el.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          const slug = (el as HTMLElement).dataset.slug;
+          const type = (el as HTMLElement).dataset.type || "peribahasa";
+          if (!slug) return;
+          window.location.href = `/kamus/${type}/${encodeURIComponent(slug)}`;
+        });
+      });
+    };
+
+    const fetchSuggestions = async (raw: string) => {
+      if (abortController) abortController.abort();
+      abortController = new AbortController();
+
+      try {
+        const wordType = root.getAttribute("data-word-type") || "all";
+        const res = await fetch(
+          `/api/search/suggestions?q=${encodeURIComponent(raw)}&word_type=${encodeURIComponent(wordType)}`,
+          { signal: abortController.signal }
+        );
+        if (!res.ok) return close();
+        const data = await res.json();
+        render(Array.isArray(data) ? data : []);
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== "AbortError") close();
+      }
+    };
+
+    input.addEventListener("input", (e) => {
+      const target = e.target as HTMLInputElement;
+      const raw = target.value;
+      clearTimeout(debounce);
+      if (normalizeSearchInput(raw).length < 2) return close();
+      debounce = setTimeout(() => fetchSuggestions(raw.trim()), 200);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!root.contains(e.target as Node)) close();
+    });
+  });
+</script>

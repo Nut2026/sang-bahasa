@@ -1,0 +1,149 @@
+---
+export const prerender = false;
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import PeribahasaHeader from "../../../components/PeribahasaHeader.astro";
+import EntryDetail from "../../../components/EntryDetail.astro";
+import ResultCard from "../../../components/ResultCard.astro";
+import Confetti from "../../../components/Confetti.astro";
+import { getBahasaKlasikBySlug, getBahasaKlasikByCategory, type BahasaKlasikRow } from "../../../utils/supabase";
+import { getEntryNavigation } from "../../../utils/entryNavigation";
+import type { EntryNavigation } from "../../../utils/entryNavigation";
+
+const { slug } = Astro.params;
+
+const WORD_TYPE = "bahasa-klasik";
+const BASE_URL = "/kamus/bahasa-klasik";
+
+// Helper to convert row to full entry format
+function toFullEntry(row: BahasaKlasikRow) {
+  return {
+    id: row.id,
+    phrase: row.phrase,
+    slug: row.slug || row.phrase.toLowerCase().replace(/\s+/g, "-"),
+    meaning_ms: row.meaning_ms,
+    example_ms: row.example_ms,
+    s_meaning_ms: row.s_meaning_ms ?? null,
+    s_example_ms: row.s_example_ms ?? null,
+    category: row.category || "",
+    tags: [],
+    is_published: row.is_published ?? true,
+    word_type: WORD_TYPE,
+    meta_title_ms: null,
+    meta_description_ms: null,
+    created_at: row.created_at || "",
+    _type: row._type ?? null,
+  };
+}
+
+function toSummary(row: BahasaKlasikRow) {
+  return {
+    id: row.id,
+    phrase: row.phrase,
+    slug: row.slug || row.phrase.toLowerCase().replace(/\s+/g, "-"),
+    meaning_ms: row.meaning_ms,
+    category: row.category || "",
+    word_type: WORD_TYPE,
+    created_at: row.created_at,
+    _type: row._type ?? null,
+  };
+}
+
+let entry: ReturnType<typeof toFullEntry> | null = null;
+let related: ReturnType<typeof toSummary>[] = [];
+let navigation: EntryNavigation = { previous: null, next: null };
+let notFound = false;
+
+try {
+  const row = await getBahasaKlasikBySlug(slug!);
+  if (row) {
+    entry = toFullEntry(row);
+  } else {
+    notFound = true;
+  }
+} catch (err) {
+  console.error("Error fetching bahasa klasik:", err);
+  notFound = true;
+}
+
+if (notFound || !entry) {
+  return Astro.redirect(BASE_URL, 302);
+}
+
+try {
+  const categoryEntries = await getBahasaKlasikByCategory(entry.category, 20, 0);
+  related = categoryEntries
+    .filter((item) => (item.slug || item.phrase.toLowerCase().replace(/\s+/g, "-")) !== slug)
+    .slice(0, 5)
+    .map(toSummary);
+} catch {
+  related = [];
+}
+
+try {
+  navigation = await getEntryNavigation(WORD_TYPE, slug!);
+} catch {
+  navigation = { previous: null, next: null };
+}
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || "http://localhost:4321";
+const canonicalUrl = `${siteUrl}${BASE_URL}/${slug}`;
+
+const metaTitle = entry.meta_title_ms
+  || `${entry.phrase} - Maksud dan Contoh`;
+
+const metaDesc = entry.meta_description_ms
+  || `Maksud "${entry.phrase}": ${entry.meaning_ms.slice(0, 140)}`;
+---
+
+<BaseLayout
+  title={metaTitle}
+  description={metaDesc}
+  canonicalUrl={canonicalUrl}
+>
+  <Confetti />
+  <div class="entry-page">
+    <div class="container container--narrow">
+      <PeribahasaHeader
+        phrase={entry!.phrase}
+        category={entry!.category}
+        tags={[]}
+        wordType={WORD_TYPE}
+      />
+
+      <EntryDetail entry={entry!} wordType={WORD_TYPE} showBackToAll={true} navigation={navigation} />
+    </div>
+
+    {
+      related.length > 0 && (
+        <div class="section section--alt" style="margin-top: var(--space-12);">
+          <div class="container">
+            <div class="section__header">
+              <h2 class="section__title">Bahasa Klasik Berkaitan</h2>
+              <a
+                href={`${BASE_URL}?category=${entry!.category}`}
+                class="section__link"
+              >
+                Lihat kategori &rarr;
+              </a>
+            </div>
+            <div class="results-grid">
+              {related.map((item) => (
+                <ResultCard entry={item} wordType={WORD_TYPE} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<script is:inline define:vars={{ wordType: WORD_TYPE, slug: entry.slug }}>
+  // Track view when page loads
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.trackTrenDuniaView) {
+      window.trackTrenDuniaView(wordType, slug);
+    }
+  });
+</script>

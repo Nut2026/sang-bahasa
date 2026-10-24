@@ -1,0 +1,281 @@
+---
+export const prerender = false;
+
+import ResultCard from "../components/ResultCard.astro";
+import SearchNoMatchChampion from "../components/SearchNoMatchChampion.astro";
+import SearchBar from "../components/SearchBar.astro";
+import { ENDPOINTS, apiFetch } from "../config/apiConfig";
+import type {
+  CategoryInfo,
+  SearchResult,
+  PeribahasaSummary,
+} from "../config/apiConfig";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { resolveSearchResults } from "../utils/searchResults";
+import { getTopTrenDuniaSummaries } from "../utils/trenDunia";
+
+const url = Astro.url;
+
+const rawQueryParam = url.searchParams.get("q");
+const isSearch = rawQueryParam !== null;
+
+const query = (rawQueryParam ?? "").trim();
+const category = url.searchParams.get("category") || "";
+const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+const PAGE_SIZE = 20;
+
+let allEntries: SearchResult | null = null;
+let categories: CategoryInfo[] = [];
+let error = "";
+let similarEntries: PeribahasaSummary[] = [];
+
+try {
+  categories = await apiFetch<CategoryInfo[]>(ENDPOINTS.categories());
+} catch {
+  categories = [];
+}
+
+try {
+  if (isSearch) {
+    if (query.length > 0) {
+      const resolved = await resolveSearchResults({
+        query,
+        category,
+        page,
+        pageSize: PAGE_SIZE,
+        wordType: "all",
+      });
+      allEntries = resolved.result;
+      similarEntries = resolved.similarEntries;
+    } else {
+      allEntries = {
+        query,
+        total: 0,
+        page,
+        page_size: PAGE_SIZE,
+        results: [],
+      };
+    }
+  } else {
+    const fetchUrl = category
+      ? ENDPOINTS.entriesByCategory(category, page, PAGE_SIZE)
+      : ENDPOINTS.entries(page, PAGE_SIZE);
+
+    allEntries = await apiFetch<SearchResult>(fetchUrl);
+  }
+} catch {
+  error = "Tidak dapat menghubungi pelayan. Sila cuba sebentar lagi.";
+}
+
+const total = allEntries?.total ?? 0;
+const entries = allEntries?.results ?? [];
+const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+const showNoMatch = isSearch && query.length > 0 && entries.length === 0 && !error;
+
+const closestMatches = similarEntries.slice(0, 5);
+
+// Only show champion if there are no closest matches
+let championsWhenNoMatch: PeribahasaSummary[] = [];
+if (showNoMatch && closestMatches.length === 0) {
+  try {
+    const tops = await getTopTrenDuniaSummaries(3, "all");
+    championsWhenNoMatch = tops;
+  } catch {
+    championsWhenNoMatch = [];
+  }
+}
+
+function buildUrl(nextPage: number) {
+  const params = new URLSearchParams();
+
+  if (isSearch) params.set("q", query);
+  if (category) params.set("category", category);
+
+  params.set("page", String(nextPage));
+  return `/search?${params.toString()}`;
+}
+
+const pageTitle = isSearch
+  ? `Hasil carian${query ? `: "${query}"` : ""}`
+  : category
+    ? `Kategori: ${category}`
+    : "Kamus";
+
+const metaDesc = isSearch
+  ? `${total} entri Melayu dijumpai untuk carian${query ? ` "${query}"` : ""}.`
+  : "Semak imbas koleksi Peribahasa, Simpulan Bahasa, dan Bahasa Klasik Melayu.";
+---
+
+<BaseLayout title={pageTitle} description={metaDesc}>
+  <div data-search-root style="padding: var(--space-8) 0 var(--space-4);">
+    <div class="container">
+      <div style="margin-bottom: var(--space-6);">
+        <SearchBar initialValue={query} autofocus={!query} />
+      </div>
+
+      <div class="category-pills">
+        {
+          categories.map((cat) => (
+            <a
+              href={`/search?category=${cat.slug}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
+              class={`category-pill ${category === cat.slug ? "category-pill--active" : ""}`}
+            >
+              {cat.name_ms}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <div style="padding-bottom: var(--space-16);">
+    <div class="container">
+      {error && (
+        <div class="error-banner" role="alert">
+          {error}
+        </div>
+      )}
+
+      {!error && (
+        <div class="results-header">
+          <p class="results-count">
+            {isSearch ? (
+              <>
+                <strong>{total}</strong> keputusan untuk "{query}"
+              </>
+            ) : (
+              <>
+                Menunjukkan <strong>{entries.length}</strong> daripada{" "}
+                <strong>{total}</strong> entri
+              </>
+            )}
+          </p>
+        </div>
+      )}
+
+      {/* RESULTS SECTION */}
+      {entries.length > 0 && !error && (
+        <>
+          <div class="results-grid">
+            {entries.map((entry) => (
+              <ResultCard entry={entry} wordType={entry.word_type || "peribahasa"} />
+            ))}
+          </div>
+
+          <div class="search-actions search-actions--all" style="margin-top: var(--space-10); margin-bottom: var(--space-4);">
+            <a href="/kamus" class="btn btn--secondary">
+              &larr; Kembali ke Semua
+            </a>
+            <button type="button" class="btn btn--secondary" data-cari-lagi>
+              Cari lagi
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* NO MATCH SECTION */}
+      {showNoMatch && !error && (
+        <>
+          <div class="empty-state">
+            <div class="empty-state__icon">🔎</div>
+
+            <h2 class="empty-state__title">
+              Tiada padanan tepat dijumpai
+            </h2>
+
+            <p class="empty-state__text">
+              {query
+                ? `Tiada carian tepat untuk "${query}". Cuba semak ejaan atau hantar cadangan anda di Google Forms.`
+                : "Oops! Maaf, Sang Bahasa belum cukup 'tech' membaca minda anda. Cuba taip sesuatu untuk melihat ajaib."}
+            </p>
+          </div>
+
+          {closestMatches.length > 0 && (
+            <div class="closest-matches" style="margin-top: var(--space-2); margin-bottom: var(--space-10);">
+              <p style="font-weight: 600; margin-bottom: var(--space-3);">Adakah anda mencari satu daripada ini?</p>
+              <div class="results-grid">
+                {closestMatches.map((entry) => (
+                  <ResultCard entry={entry} wordType={entry.word_type || "peribahasa"} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Champion Section with spacing wrapper */}
+          <div style="margin-top: var(--space-2); margin-bottom: var(--space-10);">
+            <SearchNoMatchChampion champions={championsWhenNoMatch} showSection={closestMatches.length === 0} />
+          </div>
+
+          {/* Buttons with proper spacing */}
+          <div class="search-actions search-actions--all" style="margin-top: var(--space-2); margin-bottom: var(--space-4);">
+            <a href="/kamus" class="btn btn--secondary">
+              &larr; Kembali ke Semua
+            </a>
+            <button type="button" class="btn btn--secondary" data-cari-lagi>
+              Cari lagi
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <nav class="pagination" aria-label="Pagination">
+          {page > 1 && (
+            <a href={buildUrl(page - 1)} class="pagination__link pagination__link--prev">
+              &larr; Sebelumnya
+            </a>
+          )}
+
+          <span class="pagination__info">
+            Halaman {page} daripada {totalPages}
+          </span>
+
+          {page < totalPages && (
+            <a href={buildUrl(page + 1)} class="pagination__link pagination__link--next">
+              Seterusnya &rarr;
+            </a>
+          )}
+        </nav>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .search-actions--all {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener("click", (e) => {
+    const btn = e.target?.closest?.("[data-cari-lagi]");
+    if (!btn) return;
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    window.setTimeout(() => {
+      const root = document.querySelector("[data-search-root]");
+      const input = root?.querySelector("[data-search-input]");
+      if (!input) return;
+
+      if (typeof root?.focusSearchInput === "function") {
+        root.focusSearchInput();
+      }
+
+      input.focus();
+
+      const len = input.value?.length ?? 0;
+      try {
+        input.setSelectionRange(len, len);
+      } catch {
+        input.value = input.value;
+      }
+    }, 250);
+  });
+</script>

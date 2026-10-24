@@ -1,0 +1,209 @@
+---
+export const prerender = false;
+
+import SearchBar from "@/components/SearchBar.astro";
+import ResultCard from "@/components/ResultCard.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+import type { SearchResult, PeribahasaSummary } from "@/config/apiConfig";
+import { resolveSearchResults } from "@/utils/searchResults";
+import { normalizeTag } from "@/utils/kamus";
+
+const PAGE_SIZE = 10;
+const WORD_TYPE = "all";
+const LIST_BASE = "/kamus/semua";
+
+const url = Astro.url;
+
+const query = url.searchParams.get("q")?.trim() || "";
+const selectedType = normalizeTag(url.searchParams.get("type") || "");
+const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+
+let results: SearchResult | null = null;
+let error = "";
+let suggestions: PeribahasaSummary[] = [];
+let similarEntries: PeribahasaSummary[] = [];
+
+try {
+  const resolved = await resolveSearchResults({
+    query,
+    type: selectedType || undefined,
+    page,
+    pageSize: PAGE_SIZE,
+    wordType: WORD_TYPE,
+  });
+  results = resolved.result;
+  suggestions = resolved.suggestions;
+  similarEntries = resolved.similarEntries;
+} catch {
+  error = "Tidak dapat menghubungi pelayan. Sila cuba sebentar lagi.";
+}
+
+const entries = results?.results ?? [];
+const total = results?.total ?? 0;
+const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+const showNoMatch = query.length > 0 && entries.length === 0 && !error;
+
+const closestMatches = similarEntries.slice(0, 5);
+
+function truncateQuery(q: string, maxLen: number = 27): string {
+  if (q.length <= maxLen) return q;
+  return q.slice(0, maxLen) + "...";
+}
+
+const displayQuery = truncateQuery(query);
+
+function buildUrl(nextPage: number) {
+  const params = new URLSearchParams();
+
+  if (query) params.set("q", query);
+  if (selectedType) params.set("type", selectedType);
+  params.set("page", String(nextPage));
+
+  return `${LIST_BASE}?${params.toString()}`;
+}
+
+const pageTitle = query
+  ? `Hasil carian Semua: "${displayQuery}"`
+  : "Semua Entri";
+
+const metaDesc = query
+  ? `${total} entri dijumpai untuk carian "${displayQuery}".`
+  : "Semak imbas koleksi lengkap Peribahasa dan Bahasa Klasik Melayu dengan makna dan contoh ayat.";
+---
+
+<BaseLayout title={pageTitle} description={metaDesc}>
+  <div style="padding: var(--space-8) 0 var(--space-4);">
+    <div class="container">
+      <div style="margin-bottom: var(--space-6);">
+        <SearchBar initialValue={query} autofocus={!query} placeholder="Cari sesuatu..." wordType={WORD_TYPE} />
+      </div>
+    </div>
+  </div>
+
+  <div style="padding-bottom: var(--space-16);">
+    <div class="container">
+      {error && (
+        <div class="error-banner" role="alert">
+          {error}
+        </div>
+      )}
+
+      {!error && (
+        <div class="results-header">
+          <p class="results-count">
+            {query ? (
+              <>
+                <strong>{total}</strong> keputusan untuk "{displayQuery}"
+              </>
+            ) : (
+              <>
+                Menunjukkan <strong>{entries.length}</strong> daripada{" "}
+                <strong>{total}</strong> entri
+              </>
+            )}
+          </p>
+        </div>
+      )}
+
+      {entries.length > 0 && !error && (
+        <div class="results-grid">
+          {entries.map((entry) => (
+            <ResultCard entry={entry} wordType={entry.word_type || "peribahasa"} />
+          ))}
+        </div>
+      )}
+
+      {showNoMatch && (
+        <>
+          <div class="empty-state">
+            <div class="empty-state__icon">🔎</div>
+
+            <h2 class="empty-state__title">
+              Tiada padanan tepat dijumpai
+            </h2>
+
+            <p class="empty-state__text">
+              {query
+                ? (
+                  <>
+                    Tiada carian tepat untuk "<span class="truncated-query">{displayQuery}</span>". Cuba semak ejaan atau <a href="https://forms.gle/EEKuNwG3V1ZPGhTT6" class="lihat-semua" target="_blank" rel="noopener noreferrer">hantar cadangan anda</a> di Google Forms.
+                  </>
+                )
+                : "Oops! Maaf, Sang Bahasa belum cukup 'tech' membaca minda anda. Cuba taip sesuatu untuk melihat ajaib."}
+            </p>
+          </div>
+
+          {closestMatches.length > 0 && (
+            <div class="closest-matches" style="margin-top: var(--space-6);">
+              <p style="font-weight: 600; margin-bottom: var(--space-3);">Adakah anda mencari satu daripada ini?</p>
+              <div class="results-grid">
+                {closestMatches.map((entry) => (
+                  <ResultCard entry={entry} wordType={entry.word_type || "peribahasa"} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div class="no-match-actions" style="margin-top:var(--space-5);">
+            <a href={LIST_BASE} class="btn btn--secondary">
+              Lihat semua entri
+            </a>
+            <button type="button" class="btn btn--secondary" data-cari-lagi>
+              Cari lagi
+            </button>
+          </div>
+        </>
+      )}
+
+      {totalPages > 1 && (
+        <nav class="pagination" aria-label="Pagination">
+          {page > 1 && (
+            <a href={buildUrl(page - 1)} class="pagination__link pagination__link--prev">
+              &larr; Sebelumnya
+            </a>
+          )}
+
+          <span class="pagination__info">
+            Halaman {page} daripada {totalPages}
+          </span>
+
+          {page < totalPages && (
+            <a href={buildUrl(page + 1)} class="pagination__link pagination__link--next">
+              Seterusnya &rarr;
+            </a>
+          )}
+        </nav>
+      )}
+
+      {showNoMatch && (
+        <div class="no-match-actions" style="margin-top:var(--space-5);">
+          <a href={LIST_BASE} class="btn btn--secondary">
+            Lihat semua entri
+          </a>
+          <button type="button" class="btn btn--secondary" data-cari-lagi>
+            Cari lagi
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .truncated-query {
+    font-weight: 600;
+  }
+
+  .lihat-semua {
+    color: #065f46;
+    text-decoration: underline;
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+
+  .lihat-semua:hover {
+    color: #064e3b;
+  }
+</style>

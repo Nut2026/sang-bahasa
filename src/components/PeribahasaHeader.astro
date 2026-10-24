@@ -1,0 +1,57 @@
+---
+import { getListingUrl, getWordTypeLabel } from "../config/routes";
+import { formatMalayLabel } from "../utils/kamus";
+
+interface Props {
+  phrase: string;
+  category: string;
+  tags: string[];
+  wordType?: string;
+}
+
+const { phrase, category, tags, wordType = "peribahasa" } = Astro.props;
+
+const safeTags = Array.isArray(tags) ? tags : [];
+const categoryLabel = formatMalayLabel(category);
+
+// Truncate phrase for breadcrumb if > 3 characters
+function truncateBreadcrumb(text: string, maxLen: number = 3): string {
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen) + "...";
+}
+
+const breadcrumbData = [
+  { label: "Laman Utama", url: "/" },
+  { label: "Kamus", url: "/kamus" },
+  { label: getWordTypeLabel(wordType), url: getListingUrl(wordType) },
+  { label: truncateBreadcrumb(phrase) },
+];
+---
+
+<div class="entry-header">
+  <nav class="entry-breadcrumb" aria-label="Breadcrumb">
+    {breadcrumbData.map((item, index) => (
+      <>
+        {item.url ? (
+          <a href={item.url}>{item.label}</a>
+        ) : (
+          <span aria-current="page">{item.label}</span>
+        )}
+        {index < breadcrumbData.length - 1 && (
+          <span class="entry-breadcrumb__sep" aria-hidden="true">&rsaquo;</span>
+        )}
+      </>
+    ))}
+  </nav>
+
+  <h1 class="entry-phrase">{phrase}</h1>
+
+  <div class="entry-meta">
+    <span class="entry-category-badge">{categoryLabel}</span>
+    {
+      safeTags.slice(0, 5).map((tag) => (
+        <span class="tag">{tag}</span>
+      ))
+    }
+  </div>
+</div>

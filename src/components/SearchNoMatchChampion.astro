@@ -1,0 +1,60 @@
+---
+import type { PeribahasaSummary } from "../config/apiConfig";
+import ResultCard from "./ResultCard.astro";
+
+interface Props {
+  champions: PeribahasaSummary[];
+  showSection: boolean;
+}
+
+const { champions = [], showSection = false } = Astro.props;
+---
+
+{showSection && (
+  <div class="search-no-match-champion">
+    <p class="search-no-match-champion__title">
+      Atau lawati Juara Hari Ini
+    </p>
+    {champions.length > 0 ? (
+      <div class="results-grid search-no-match-champion__cards">
+        {champions.map((entry) => (
+          <ResultCard entry={entry} wordType={entry.word_type || "peribahasa"} />
+        ))}
+      </div>
+    ) : (
+      <p class="search-no-match-champion__empty">
+        Ayo, tiada aktiviti hari ini! Cuba klik pada entri yang paling menarik untuk cipta rekod.
+      </p>
+    )}
+  </div>
+)}
+
+<style>
+  .search-no-match-champion {
+    margin-top: var(--space-2);
+  }
+
+  .search-no-match-champion__title {
+    margin: 0 0 var(--space-4);
+    font-weight: 600;
+    font-size: var(--text-base, 1rem);
+    color: var(--color-text, #111827);
+  }
+
+  .search-no-match-champion__cards {
+    max-width: none;
+    margin: 0;
+  }
+
+  .search-no-match-champion__empty {
+    margin: 0;
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    text-align: center;
+    font-size: var(--text-sm);
+  }
+</style>
+
