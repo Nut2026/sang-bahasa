@@ -1,8 +1,8 @@
-import { c as createComponent } from './astro-component_Rz2ymryl.mjs';
+import { c as createComponent } from './astro-component_S0B6rbTO.mjs';
 import 'piccolore';
-import { n as renderComponent, r as renderTemplate, m as maybeRenderHead, o as Fragment, h as addAttribute } from './entrypoint_IgdAE7NG.mjs';
-import { r as resolveSearchResults, $ as $$SearchBar } from './searchResults_CsU4H_Uy.mjs';
-import { $ as $$BaseLayout, a as $$ResultCard } from './BaseLayout_tD9nsf-j.mjs';
+import { n as renderComponent, r as renderTemplate, m as maybeRenderHead, o as Fragment, h as addAttribute } from './entrypoint_L8jLJ3IM.mjs';
+import { r as resolveSearchResults, $ as $$SearchBar } from './searchResults__MseF5F6.mjs';
+import { $ as $$BaseLayout, a as $$ResultCard } from './BaseLayout_CkSMOw68.mjs';
 import { n as normalizeTag } from './kamus_CcPSdIwT.mjs';
 
 const prerender = false;
@@ -11,7 +11,7 @@ const $$Index = createComponent(async ($$result, $$props, $$slots) => {
   Astro2.self = $$Index;
   const PAGE_SIZE = 10;
   const WORD_TYPE = "all";
-  const LIST_BASE = "/kamus";
+  const LIST_BASE = "/kamus/semua";
   const url = Astro2.url;
   const query = url.searchParams.get("q")?.trim() || "";
   const selectedType = normalizeTag(url.searchParams.get("type") || "");
@@ -74,10 +74,10 @@ Lihat semua entri
 </a> <button type="button" class="btn btn--secondary" data-cari-lagi>
 Cari lagi
 </button> </div>`} </div> </div> ` })}`;
-}, "D:/4-dev/sangbahasa/src/pages/kamus/index.astro", void 0);
+}, "D:/4-dev/sangbahasa/src/pages/kamus/semua/index.astro", void 0);
 
-const $$file = "D:/4-dev/sangbahasa/src/pages/kamus/index.astro";
-const $$url = "/kamus";
+const $$file = "D:/4-dev/sangbahasa/src/pages/kamus/semua/index.astro";
+const $$url = "/kamus/semua";
 
 const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,

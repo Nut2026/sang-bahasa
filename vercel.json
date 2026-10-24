@@ -15,7 +15,7 @@
       ]
     },
     {
-      "source": "/sitemap*",
+      "source": "/sitemap(.+)",
       "headers": [
         {
           "key": "Cache-Control",

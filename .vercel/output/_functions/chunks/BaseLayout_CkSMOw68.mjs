@@ -1,6 +1,6 @@
-import { c as createComponent } from './astro-component_Rz2ymryl.mjs';
+import { c as createComponent } from './astro-component_S0B6rbTO.mjs';
 import 'piccolore';
-import { q as createRenderInstruction, m as maybeRenderHead, h as addAttribute, r as renderTemplate, n as renderComponent, v as renderSlot, w as renderHead } from './entrypoint_IgdAE7NG.mjs';
+import { q as createRenderInstruction, m as maybeRenderHead, h as addAttribute, r as renderTemplate, n as renderComponent, v as renderSlot, w as renderHead } from './entrypoint_L8jLJ3IM.mjs';
 import 'clsx';
 import { c as formatEntryTypeDisplayLabel, f as formatMalayLabel, d as buildTypeFilterHref, e as buildCategoryFilterHref, h as getListingPathForWordType } from './kamus_CcPSdIwT.mjs';
 

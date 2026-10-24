@@ -1,7 +1,7 @@
-import { c as createComponent } from './astro-component_Rz2ymryl.mjs';
+import { c as createComponent } from './astro-component_S0B6rbTO.mjs';
 import 'piccolore';
-import { m as maybeRenderHead, n as renderComponent, o as Fragment, r as renderTemplate, h as addAttribute } from './entrypoint_IgdAE7NG.mjs';
-import { g as getListingUrl, b as getWordTypeLabel, r as renderScript, c as getEntryUrl } from './BaseLayout_tD9nsf-j.mjs';
+import { m as maybeRenderHead, n as renderComponent, o as Fragment, r as renderTemplate, h as addAttribute } from './entrypoint_L8jLJ3IM.mjs';
+import { g as getListingUrl, b as getWordTypeLabel, r as renderScript, c as getEntryUrl } from './BaseLayout_CkSMOw68.mjs';
 import { f as formatMalayLabel, n as normalizeTag, a as getEntriesByWordType } from './kamus_CcPSdIwT.mjs';
 import 'clsx';
 

@@ -1,7 +1,7 @@
-import { c as createComponent } from './astro-component_Rz2ymryl.mjs';
+import { c as createComponent } from './astro-component_S0B6rbTO.mjs';
 import 'piccolore';
-import { m as maybeRenderHead, n as renderComponent, r as renderTemplate } from './entrypoint_IgdAE7NG.mjs';
-import { a as $$ResultCard } from './BaseLayout_tD9nsf-j.mjs';
+import { m as maybeRenderHead, n as renderComponent, r as renderTemplate } from './entrypoint_L8jLJ3IM.mjs';
+import { a as $$ResultCard } from './BaseLayout_CkSMOw68.mjs';
 
 const $$SearchNoMatchChampion = createComponent(($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$props, $$slots);
