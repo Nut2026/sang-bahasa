@@ -82,21 +82,17 @@ const searchUrl = wordType === "all"
 .search-input {
   flex: 1;
   padding: 14px 24px;
-  /* Use a fixed pixel value for a perfect pill shape regardless of height */
   border-radius: 100px !important; 
   border: 2px solid #e5e7eb;
   font-size: 16px;
   background: white;
   color: #111827;
-  /* Crucial: Disable browser's default focus ring */
   outline: none !important;
-  /* Prevent OS-specific styling overrides */
   -webkit-appearance: none;
   appearance: none;
   transition: border-color 0.2s ease;
 }
 
-/* Force the pill shape to remain during click/focus */
 .search-input:focus, 
 .search-input:active {
   border-color: #2ecc71;
@@ -121,7 +117,6 @@ const searchUrl = wordType === "all"
   background: #27ae60;
 }
 
-/* Suggestion Panel Styling */
 .search-container .search-suggestions {
   position: absolute;
   top: calc(100% + 12px);

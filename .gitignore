@@ -1,25 +1,20 @@
-# Dependencies
 node_modules/
 .pnpm-store/
 
-# Build outputs
 dist/
 build/
 out/
 .astro/
 .vercel/
 
-# Environment variables
 .env
 .env.*
 !.env.example
 
-# OS files
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Logs
 logs/
 *.log
 npm-debug.log*
@@ -27,7 +22,6 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# IDE
 .vscode/
 !.vscode/extensions.json
 !.vscode/settings.json
@@ -36,12 +30,10 @@ yarn-error.log*
 *.swo
 *~
 
-# Cache
 .cache/
 .parcel-cache/
 docs/
 
-# Misc
 *.bak
 *.tmp
 *.temp

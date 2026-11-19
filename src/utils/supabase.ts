@@ -1,12 +1,4 @@
-// ============================================================
-// Sang Bahasa — Supabase Client (Astro-safe, production-ready)
-// ============================================================
-
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-
-// ============================================================
-// Environment (Astro)
-// ============================================================
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -16,10 +8,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
     "[Supabase] Missing PUBLIC_SUPABASE_URL or PUBLIC_SUPABASE_ANON_KEY in .env"
   );
 }
-
-// ============================================================
-// Singleton client
-// ============================================================
 
 let supabase: SupabaseClient | null = null;
 
@@ -34,10 +22,6 @@ export function getSupabaseClient(): SupabaseClient {
   }
   return supabase;
 }
-
-// ============================================================
-// Shared types (MATCHING YOUR SQL SCHEMA)
-// ============================================================
 
 type UUID = string;
 
@@ -68,10 +52,6 @@ export interface PeribahasaRow {
   world?: number | null;
   created_at?: string;
 }
-
-// ============================================================
-// Generic fetch helper
-// ============================================================
 
 async function fetchFromTable<T>(
   table: string,
@@ -123,7 +103,7 @@ async function fetchFromTable<T>(
 }
 
 const FETCH_ALL_BATCH_SIZE = 1000;
-const FETCH_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const FETCH_CACHE_TTL_MS = 10 * 60 * 1000;
 const fetchCache = new Map<string, { data: unknown; expiry: number }>();
 
 function cacheKey(table: string, filters?: any): string {
@@ -167,10 +147,6 @@ async function fetchAllFromTable<T>(
   fetchCache.set(key, { data: rows, expiry: Date.now() + FETCH_CACHE_TTL_MS });
   return rows;
 }
-
-// ============================================================
-// PERIBAHASA
-// ============================================================
 
 export async function getAllPeribahasa(options?: {
   limit?: number;
@@ -264,7 +240,6 @@ export async function getRandomPeribahasa(
     throw new Error(`[Supabase:peribahasa] ${error.message}`);
   }
 
-  // Shuffle the results
   const shuffled = (data ?? []).sort(() => Math.random() - 0.5);
   return shuffled as PeribahasaRow[];
 }
@@ -293,10 +268,6 @@ export async function getTrendingWorldPeribahasa(limit = 5): Promise<PeribahasaR
     limit,
   });
 }
-
-// ============================================================
-// BAHASA KLASIK
-// ============================================================
 
 export async function getAllBahasaKlasik(options?: {
   limit?: number;
@@ -363,10 +334,6 @@ export async function getTrendingWorldBahasaKlasik(limit = 5): Promise<BahasaKla
     limit,
   });
 }
-
-// ============================================================
-// GLOBAL SEARCH
-// ============================================================
 
 export async function searchAll(query: string, limit = 10) {
   const [peribahasa, klasik] = await Promise.all([

@@ -1,21 +1,9 @@
-// ============================================================
-// Sang Bahasa — client-side search ranking
-// Normalises input like DB pipelines (trim, lower case, collapse
-// spaces, strip punctuation) and ranks entries using token overlap
-// (tsvector-style) plus trigram similarity (pg_trgm-style).
-// ============================================================
-
 import type { KamusEntrySummary } from "./kamus";
 
-/** Strip combining marks after NFKD (helps match typed Latin variants). */
 function stripCombiningMarks(value: string): string {
   return value.replace(/\p{M}+/gu, "");
 }
 
-/**
- * Normalise user search input for matching: trim, lowercase, strip
- * punctuation to spaces, collapse whitespace.
- */
 export function normalizeSearchInput(raw: string): string {
   const folded = String(raw ?? "")
     .trim()
@@ -41,7 +29,6 @@ function trigramSet(s: string): Set<string> {
   return set;
 }
 
-/** PostgreSQL-compatible trigram similarity: |X∩Y| / (|X|+|Y|−|X∩Y|). */
 export function pgTrigramSimilarity(a: string, b: string): number {
   const A = trigramSet(a);
   const B = trigramSet(b);
@@ -59,10 +46,8 @@ export interface RankedKamusEntry {
   score: number;
 }
 
-/** Minimum score to count as a primary search hit. */
 export const SEARCH_MAIN_SCORE_THRESHOLD = 14;
 
-/** Softer threshold for “Adakah anda mencari…” when nothing clears the bar. */
 export const SEARCH_FALLBACK_SCORE_THRESHOLD = 7;
 
 export function rankKamusEntries(

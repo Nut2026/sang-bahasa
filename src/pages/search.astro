@@ -40,7 +40,6 @@ let categories: CategoryInfo[] = [];
 let error = "";
 let similarEntries: PeribahasaSummary[] = [];
 
-// Fetch categories from Supabase directly
 try {
   const client = getSupabaseClient();
   const { data, error: catError } = await client
@@ -75,7 +74,6 @@ try {
       };
     }
   } else {
-    // Fetch entries from Supabase directly using client-side search utilities
     const entries = await getEntriesByWordType("all");
     const filtered = filterEntries(entries, { category });
     const pageSlice = paginateEntries(filtered, page, PAGE_SIZE);
@@ -109,7 +107,6 @@ const showNoMatch = isSearch && query.length > 0 && entries.length === 0 && !err
 
 const closestMatches = similarEntries.slice(0, 5);
 
-// Only show champion if there are no closest matches
 let championsWhenNoMatch: PeribahasaSummary[] = [];
 if (showNoMatch && closestMatches.length === 0) {
   try {
@@ -188,7 +185,6 @@ const metaDesc = isSearch
         </div>
       )}
 
-      {/* RESULTS SECTION */}
       {entries.length > 0 && !error && (
         <>
           <div class="results-grid">
@@ -208,7 +204,6 @@ const metaDesc = isSearch
         </>
       )}
 
-      {/* NO MATCH SECTION */}
       {showNoMatch && !error && (
         <>
           <div class="empty-state">
@@ -236,12 +231,10 @@ const metaDesc = isSearch
             </div>
           )}
 
-          {/* Champion Section with spacing wrapper */}
           <div style="margin-top: var(--space-2); margin-bottom: var(--space-10);">
             <SearchNoMatchChampion champions={championsWhenNoMatch} showSection={closestMatches.length === 0} />
           </div>
 
-          {/* Buttons with proper spacing */}
           <div class="search-actions search-actions--all" style="margin-top: var(--space-2); margin-bottom: var(--space-4);">
             <a href="/kamus" class="btn btn--secondary">
               &larr; Kembali ke Semua
@@ -253,7 +246,6 @@ const metaDesc = isSearch
         </>
       )}
 
-      {/* PAGINATION */}
       {totalPages > 1 && (
         <nav class="pagination" aria-label="Pagination">
           {page > 1 && (

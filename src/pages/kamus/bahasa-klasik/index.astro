@@ -54,13 +54,10 @@ const entries = results?.results ?? [];
 const total = results?.total ?? 0;
 const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-// Check if there's no exact match
 const showNoMatch = query.length > 0 && entries.length === 0 && !error;
 
-// Get up to 5 similar entries for the "Adakah anda mencari" section
 const closestMatches = similarEntries.slice(0, 5);
 
-// Only show champion if there are no closest matches
 let championsWhenNoMatch: PeribahasaSummary[] = [];
 if (showNoMatch && closestMatches.length === 0) {
   try {
@@ -71,7 +68,6 @@ if (showNoMatch && closestMatches.length === 0) {
   }
 }
 
-// Truncate query for display (max 27 characters)
 function truncateQuery(q: string, maxLen: number = 27): string {
   if (q.length <= maxLen) return q;
   return q.slice(0, maxLen) + "...";
@@ -158,7 +154,6 @@ const metaDesc = query
         </div>
       )}
 
-      {/* RESULTS SECTION */}
       {entries.length > 0 && !error && (
         <>
           <div class="results-grid">
@@ -178,7 +173,6 @@ const metaDesc = query
         </>
       )}
 
-      {/* NO MATCH SECTION */}
       {showNoMatch && (
         <>
           <div class="empty-state">
@@ -210,12 +204,10 @@ const metaDesc = query
             </div>
           )}
 
-          {/* Champion Section with spacing */}
           <div style="margin-top: var(--space-2); margin-bottom: var(--space-8);">
             <SearchNoMatchChampion champions={championsWhenNoMatch} showSection={closestMatches.length === 0} />
           </div>
 
-          {/* Buttons with proper spacing */}
           <div class="search-actions search-actions--all" style="margin-top: var(--space-10); margin-bottom: var(--space-4);">
             <a href={BASE_URL} class="btn btn--secondary">
               Lihat semua entri
@@ -225,7 +217,6 @@ const metaDesc = query
             </button>
           </div>
 
-          {/* Back to Semua button */}
           <div style="margin-top: var(--space-4);">
             <a href="/kamus" class="btn btn--secondary">
               &larr; Kembali ke Semua
@@ -234,7 +225,6 @@ const metaDesc = query
         </>
       )}
 
-      {/* PAGINATION */}
       {totalPages > 1 && (
         <nav class="pagination" aria-label="Pagination">
           {page > 1 && (

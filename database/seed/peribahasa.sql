@@ -1,7 +1,5 @@
--- Memasukkan Data Peribahasa (Pepatah, Bidalan, Perumpamaan)
 INSERT INTO peribahasa (id, phrase, slug, meaning_ms, example_ms, _type, category, is_published, created_at)
 VALUES
--- PEPATAH
 (gen_random_uuid(), 'Cekur jerangau ada lagi di ubun-ubun, sudah hendak berumah tangga', 'cekur-jerangau-ada-lagi', 'Belum cukup umur atau pengalaman tetapi sudah ingin memikul tanggungjawab besar.', 'Anak muda itu ditegur kerana terlalu terburu-buru mahu berkahwin sedangkan cekur jerangau ada lagi di ubun-ubun.', 'pepatah', 'kehidupan', true, NOW()),
 (gen_random_uuid(), 'Zaman Tuk Nadur berkajang kain', 'zaman-tuk-nadur', 'Zaman yang sudah terlalu lama atau purbakala.', 'Kisah yang diceritakan oleh nenek itu terasa seperti zaman Tuk Nadur berkajang kain.', 'pepatah', 'masa', true, NOW()),
 (gen_random_uuid(), 'Kecil jangan disangka anak, besar jangan disangka bapa', 'kecil-jangan-disangka-anak', 'Pengetahuan atau kepandaian seseorang tidak ditentukan oleh umurnya.', 'Kita tidak boleh memandang rendah pada budak itu kerana kecil jangan disangka anak, besar jangan disangka bapa.', 'pepatah', 'ilmu', true, NOW()),
@@ -26,7 +24,6 @@ VALUES
 (gen_random_uuid(), 'Bahasa Menunjukkan Bangsa', 'bahasa-menunjukkan-bangsa', 'Budi bahasa dan tutur kata mencerminkan keperibadian atau identiti sesuatu bangsa.', 'Gunakanlah bahasa yang sopan kerana bahasa menunjukkan bangsa.', 'pepatah', 'bahasa', true, NOW()),
 (gen_random_uuid(), 'Bukit sama didaki, lurah sama dituruni', 'bukit-sama-didaki', 'Bersama-sama dalam menghadapi kesusahan mahupun kesenangan.', 'Pasangan suami isteri itu mengharungi hidup dengan prinsip bukit sama didaki, lurah sama dituruni.', 'pepatah', 'kesetiaan', true, NOW()),
 
--- BIDALAN
 (gen_random_uuid(), 'Belayar sambil memapan', 'belayar-sambil-memapan', 'Melakukan dua kerja atau perkara dalam satu masa.', 'Sambil menunggu bas, dia membaca buku untuk menambah ilmu, bak kata belayar sambil memapan.', 'bidalan', 'produktiviti', true, NOW()),
 (gen_random_uuid(), 'Pengayuh sayang dibasahkan, sampan tidak akan sampai ke seberang', 'pengayuh-sayang-dibasahkan', 'Cita-cita tidak akan tercapai jika tidak mahu berusaha atau bersusah payah.', 'Kamu perlu belajar bersungguh-sungguh kerana jika pengayuh sayang dibasahkan, sampan tidak akan sampai ke seberang.', 'bidalan', 'usaha', true, NOW()),
 (gen_random_uuid(), 'Bertangguh itu pencuri masa', 'bertangguh-pencuri-masa', 'Sikap suka menangguhkan kerja akan menyebabkan kerugian waktu.', 'Siapkan tugasan anda sekarang kerana bertangguh itu pencuri masa.', 'bidalan', 'masa', true, NOW()),
@@ -57,7 +54,6 @@ VALUES
 (gen_random_uuid(), 'Senduk besar tak mengenyang', 'senduk-besar-tak-mengenyang', 'Janji manis yang nampaknya hebat tetapi tidak mendatangkan faedah sebenar.', 'Ucapan politik itu hanya senduk besar tak mengenyang bagi penduduk di sini.', 'bidalan', 'janji', true, NOW()),
 (gen_random_uuid(), 'Ukur baju di badan sendiri', 'ukur-baju-di-badan-sendiri', 'Melakukan sesuatu atau berbelanja mengikut kemampuan diri sendiri.', 'Janganlah berbelanja mengikut trend jika tidak mampu, ukur baju di badan sendiri.', 'bidalan', 'bijaksana', true, NOW()),
 
--- PERUMPAMAAN
 (gen_random_uuid(), 'Hendak belajar berenang, dapatkan itik, hendak belajar memanjat, dapatkan tupai', 'belajar-berenang-dapatkan-itik', 'Belajarlah sesuatu daripada pakar atau orang yang mahir dalam bidang tersebut.', 'Jika mahu mahir dalam bidang koding, carilah mentor yang tepat, bak kata hendak belajar berenang dapatkan itik.', 'perumpamaan', 'ilmu', true, NOW()),
 (gen_random_uuid(), 'Hujan halau mentua', 'hujan-halau-mentua', 'Hujan yang turun sekejap sahaja atau hujan panas.', 'Kami tidak membatalkan perkelahan itu kerana ia hanyalah hujan halau mentua.', 'perumpamaan', 'alam', true, NOW()),
 (gen_random_uuid(), 'Kera mendapat bunga', 'kera-mendapat-bunga', 'Seseorang yang mendapat sesuatu yang berharga tetapi tidak tahu menghargainya.', 'Komputer canggih itu hanya menjadi hiasan di tangannya, ibarat kera mendapat bunga.', 'perumpamaan', 'akhlak', true, NOW()),
@@ -78,7 +74,6 @@ VALUES
 (gen_random_uuid(), 'Ketam mengajar anaknya berjalan betul', 'ketam-mengajar-anak', 'Orang yang memberi nasihat kepada orang lain sedangkan dia sendiri tidak melakukannya.', 'Ibu bapa yang merokok tetapi melarang anaknya merokok ibarat ketam mengajar anaknya berjalan betul.', 'perumpamaan', 'akhlak', true, NOW()),
 (gen_random_uuid(), 'Anak ayam kehilangan ibu', 'anak-ayam-kehilangan-ibu', 'Kumpulan yang berpecah-belah atau hilang arah selepas kehilangan ketua.', 'Setelah pengurus itu meletak jawatan, kakitangan jabatan tersebut ibarat anak ayam kehilangan ibu.', 'perumpamaan', 'kepimpinan', true, NOW()),
 
--- SIMPULAN BAHASA
 (gen_random_uuid(), 'Anak buah', 'anak-buah', 'Orang yang di bawah jagaan atau pimpinan seseorang.', 'Ketua kampung itu sentiasa mengambil berat tentang kebajikan anak buahnya.', 'simpulan bahasa', 'kepimpinan', true, NOW()),
 (gen_random_uuid(), 'Mata air', 'mata-air', 'Orang yang dicintai atau kekasih.', 'Gadis itu merupakan mata air bagi pemuda yang bekerja di bandar tersebut.', 'simpulan bahasa', 'cinta', true, NOW()),
 (gen_random_uuid(), 'Jalan tengah', 'jalan-tengah', 'Keputusan yang adil atau tidak memihak kepada mana-mana pihak.', 'Mereka akhirnya mengambil jalan tengah bagi menyelesaikan pertikaian tersebut secara aman.', 'simpulan bahasa', 'bijaksana', true, NOW()),

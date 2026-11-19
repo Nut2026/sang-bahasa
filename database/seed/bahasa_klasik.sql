@@ -1,4 +1,3 @@
--- Memasukkan Data Bahasa Klasik
 INSERT INTO bahasa_klasik (id, phrase, slug, s_meaning_ms, meaning_ms, example_ms, s_example_ms, _type, category, is_published, created_at)
 VALUES
 (gen_random_uuid(), 'Hatta', 'hatta', 'Maka / Lalu — biasanya digugurkan dalam penukaran kepada bahasa standard', 'Kata pangkal ayat yang bermaksud setelah itu atau lalu.', 'Hatta maka tersebutlah kisah seorang saudagar kaya yang sangat dermawan.', 'Maka tersebutlah kisah seorang saudagar kaya yang sangat dermawan.', 'klasik', 'prosa', true, NOW()),
@@ -27,7 +26,6 @@ VALUES
 (gen_random_uuid(), 'Pun', 'pun', 'Juga — biasanya digugurkan dalam penukaran kepada bahasa standard', 'Partikel yang digunakan untuk memberi penekanan pada subjek atau menunjukkan kesinambungan tindakan.', 'Setelah mendengar khabar itu, maka penjurit itu pun segera menghunus kerisnya.', 'Setelah mendengar khabar itu, penjurit itu segera menghunus kerisnya.', 'klasik', 'partikel', true, NOW()),
 (gen_random_uuid(), 'Adapun', 'adapun', 'Bahawa / Sesungguhnya — biasanya digugurkan dalam penukaran kepada bahasa standard', 'Kata pangkal ayat yang digunakan untuk memperkenalkan sesuatu perihal atau subjek yang akan diceritakan.', 'Adapun raja itu terlalu amat besar kerajaannya serta sangat adil perintahnya.', 'Raja itu mempunyai kerajaan yang sangat besar serta memerintah dengan adil.', 'klasik', 'prosa', true, NOW()),
 
--- Bahasa Istana
 (gen_random_uuid(), 'Berangkat', 'berangkat', '', 'Pergerakan raja atau kerabat diraja dari satu tempat ke tempat lain.', 'Sultan Perak akan berangkat ke luar negara untuk urusan rasmi esok.', '', 'istana', 'diraja', true, NOW()),
 (gen_random_uuid(), 'Mengadap', 'mengadap', '', 'Tindakan bertemu atau menghadap raja untuk tujuan tertentu.', 'Perdana Menteri telah datang ke istana untuk mengadap Yang di-Pertuan Agong.', '', 'istana', 'diraja', true, NOW()),
 (gen_random_uuid(), 'Santap', 'santap', '', 'Perbuatan makan atau minum oleh golongan raja.', 'Baginda sedang santap bersama tetamu kehormat di balairung seri.', '', 'istana', 'diraja', true, NOW()),

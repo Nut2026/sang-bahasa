@@ -15,7 +15,6 @@ const { slug } = Astro.params;
 const WORD_TYPE = "peribahasa";
 const BASE_URL = "/kamus/peribahasa";
 
-// Helper to convert row to full entry format
 function toFullEntry(row: PeribahasaRow) {
   return {
     id: row.id,
@@ -138,7 +137,6 @@ const metaDesc = entry.meta_description_ms
 </BaseLayout>
 
 <script is:inline define:vars={{ wordType: WORD_TYPE, slug: entry.slug }}>
-  // Track view when page loads
   document.addEventListener("DOMContentLoaded", () => {
     if (window.trackTrenDuniaView) {
       window.trackTrenDuniaView(wordType, slug);

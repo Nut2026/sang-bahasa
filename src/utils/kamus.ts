@@ -49,7 +49,6 @@ export function normalizeTag(value: string | null | undefined) {
   return String(value ?? "").trim().toLowerCase();
 }
 
-/** Uppercase display label for entry `_type` tags on cards (e.g. PERUMPAMAAN, KLASIK). */
 export function formatEntryTypeDisplayLabel(
   _type: string | null | undefined,
   wordType: KamusWordType | string

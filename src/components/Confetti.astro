@@ -90,29 +90,25 @@
     particles = [];
     spawning = true;
     
-    // Spewing logic: Emit particles over 400ms instead of all at once
     let start = null;
-    const duration = 400; // ms
+    const duration = 400;
     const totalParticles = 600;
 
     function spawn(timestamp) {
       if (!start) start = timestamp;
       const progress = timestamp - start;
       
-      // Calculate how many particles to add this frame
       const countThisFrame = Math.floor((totalParticles / duration) * 16); 
       
       for (let i = 0; i < countThisFrame; i++) {
         if (particles.length >= totalParticles) break;
 
-        // Left Spew (with slight random origin offset to prevent "block" look)
         particles.push(new Particle(
           canvas, 
           -10, canvas.height * 0.8 + (Math.random() * 20), 
           Math.random() * 25 + 5, Math.random() * -25 - 15
         ));
 
-        // Right Spew
         particles.push(new Particle(
           canvas, 
           canvas.width + 10, canvas.height * 0.8 + (Math.random() * 20), 
@@ -128,7 +124,6 @@
     requestAnimationFrame(spawn);
     runAnimation();
 
-    // Clean up
     setTimeout(() => {
       cancelAnimationFrame(animationFrame);
       ctx.clearRect(0, 0, canvas.width, canvas.height);

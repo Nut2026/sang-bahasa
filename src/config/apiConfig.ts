@@ -1,12 +1,3 @@
-// ============================================================
-// Sang Bahasa API Configuration
-// Types shared by the Astro frontend.
-// ============================================================
-
-// ============================================================
-// Types
-// ============================================================
-
 export interface PeribahasaSummary {
   id: string;
   phrase: string;
@@ -16,7 +7,6 @@ export interface PeribahasaSummary {
   tags?: string[];
   word_type: string;
   created_at?: string | null;
-  /** DB `_type`: peribahasa kinds or klasik / istana */
   _type?: string | null;
 }
 

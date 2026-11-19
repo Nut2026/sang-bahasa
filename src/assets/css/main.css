@@ -406,7 +406,7 @@ main {
   .site-footer__links {
     display: flex;
     font-size: var(--text-xs);
-    gap: 1.5rem; /* Space between links */
+    gap: 1.5rem;
     align-items: center;
     font-family: Georgia, "Times New Roman", Times, serif;
     flex-direction: column;

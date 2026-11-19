@@ -1,10 +1,3 @@
-// ============================================================
-// Tren Dunia — daily counts in Supabase `tren_dunia`
-// Storage slug format: daily|YYYY-MM-DD|wordType|entrySlug
-// (MY calendar day via Asia/Kuala_Lumpur). Rows from other
-// days are removed on read/write so counts reset at midnight MY.
-// ============================================================
-
 import type { PeribahasaSummary } from "../config/apiConfig";
 import { mapRowToSummary } from "./kamus";
 import {
@@ -99,7 +92,6 @@ async function resolveEntryToSummary(
   return null;
 }
 
-/** Remove rows not belonging to the given Malaysia calendar day. */
 export async function pruneTrenDuniaOutsideMalaysiaDay(
   myDate: string
 ): Promise<void> {
@@ -210,7 +202,7 @@ export async function getTopTrenDuniaSummaries(
     .select("slug, count")
     .like("slug", pattern)
     .order("count", { ascending: false })
-    .limit(limit * 3); // Fetch more to account for filtering
+    .limit(limit * 3);
 
   if (error) {
     throw new Error(`[tren_dunia] ${error.message}`);
@@ -221,7 +213,6 @@ export async function getTopTrenDuniaSummaries(
     const parsed = parseTrenDuniaRowSlug(String(row.slug));
     if (!parsed) continue;
     
-    // Filter by word type if specified and not "all"
     if (filterWordType && filterWordType !== "all") {
       const normalized = normalizeTrenWordType(filterWordType);
       if (normalized !== parsed.wordType) continue;

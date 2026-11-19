@@ -43,13 +43,10 @@ const entries = results?.results ?? [];
 const total = results?.total ?? 0;
 const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-// Check if there's no exact match
 const showNoMatch = query.length > 0 && entries.length === 0 && !error;
 
-// Get up to 5 similar entries for the "Adakah anda mencari" section
 const closestMatches = similarEntries.slice(0, 5);
 
-// Truncate query for display (max 27 characters)
 function truncateQuery(q: string, maxLen: number = 27): string {
   if (q.length <= maxLen) return q;
   return q.slice(0, maxLen) + "...";

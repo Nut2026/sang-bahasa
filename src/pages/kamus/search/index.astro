@@ -39,12 +39,10 @@ const entries = results?.results ?? [];
 const total = results?.total ?? 0;
 const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-// Check if there's no exact match
 const showNoMatch = query.length > 0 && entries.length === 0 && !error;
 
 const closestMatches = similarEntries.slice(0, 5);
 
-// Only show champion if there are no closest matches
 let championsWhenNoMatch: PeribahasaSummary[] = [];
 if (showNoMatch && closestMatches.length === 0) {
   try {
@@ -55,7 +53,6 @@ if (showNoMatch && closestMatches.length === 0) {
   }
 }
 
-// Truncate query for display (max 27 characters)
 function truncateQuery(q: string, maxLen: number = 27): string {
   if (q.length <= maxLen) return q;
   return q.slice(0, maxLen) + "...";
@@ -226,23 +223,19 @@ const metaDesc = query
     align-items: center;
   }
 
-  /* Force top margin on all search actions buttons regardless of context */
   .search-actions--with-top-margin {
     margin-top: var(--space-10) !important;
     margin-bottom: var(--space-4) !important;
   }
 
-  /* Ensure champion section has proper bottom margin */
   .champion-section-wrapper {
     margin-bottom: 0;
   }
 
-  /* Target any button container that might be elsewhere in Peribahasa/Bahasa Klasik */
   .container .search-actions {
     margin-top: var(--space-10) !important;
   }
 
-  /* Add margin to the last element before buttons if needed */
   .results-grid:last-of-type,
   .empty-state:last-of-type,
   .closest-matches:last-of-type {

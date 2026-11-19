@@ -30,7 +30,6 @@ export const GET: APIRoute = async ({ url }) => {
     const query = rawQuery.trim();
     const likePattern = `%${escapeLike(query)}%`;
 
-    // Fetch suggestions directly from Supabase using ilike for speed
     let peribahasaData: { phrase: string; slug: string; word_type?: string }[] | null = null;
     let bahasaKlasikData: { phrase: string; slug: string; word_type?: string }[] | null = null;
 
@@ -62,13 +61,11 @@ export const GET: APIRoute = async ({ url }) => {
       }));
     }
 
-    // Merge results, deduplicate by phrase, and return top matches
     const allResults = [
       ...(peribahasaData ?? []),
       ...(bahasaKlasikData ?? []),
     ];
 
-    // Deduplicate by phrase (case-insensitive)
     const seen = new Set<string>();
     const unique = allResults.filter((item) => {
       const key = item.phrase.toLowerCase();
@@ -77,7 +74,6 @@ export const GET: APIRoute = async ({ url }) => {
       return true;
     });
 
-    // Sort by phrase match quality (starts with is better than contains)
     unique.sort((a, b) => {
       const aStarts = a.phrase.toLowerCase().startsWith(query.toLowerCase()) ? 1 : 0;
       const bStarts = b.phrase.toLowerCase().startsWith(query.toLowerCase()) ? 1 : 0;
