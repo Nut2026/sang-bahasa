@@ -1,0 +1,295 @@
+---
+import type { PeribahasaFull } from "../config/apiConfig";
+import { getListingUrl, getWordTypeLabel } from "../config/routes";
+import type { EntryNavigation } from "../utils/entryNavigation";
+import { normalizeTag } from "../utils/kamus";
+
+interface Props {
+  entry: PeribahasaFull;
+  wordType?: string;
+  showBackToAll?: boolean;
+  navigation?: EntryNavigation;
+}
+
+const {
+  entry,
+  wordType = "peribahasa",
+  showBackToAll = true,
+  navigation = { previous: null, next: null },
+} = Astro.props;
+
+const wordTypeData = {
+  label: getWordTypeLabel(wordType) || "Kamus",
+  url: getListingUrl(wordType),
+};
+
+const MALAY_MONTHS = [
+  "Januari",
+  "Februari",
+  "Mac",
+  "April",
+  "Mei",
+  "Jun",
+  "Julai",
+  "Ogos",
+  "September",
+  "Oktober",
+  "November",
+  "Disember",
+];
+
+function formatMalayDate(dateInput: string | Date | null | undefined) {
+  if (!dateInput) return "";
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  if (Number.isNaN(d.getTime())) return "";
+  const day = d.getDate();
+  const month = MALAY_MONTHS[d.getMonth()] ?? "";
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`.trim();
+}
+
+const createdAtFormatted = formatMalayDate(entry.created_at);
+
+const isBahasaKlasik = wordType === "bahasa-klasik";
+const klasikKind = normalizeTag(entry._type);
+const isIstana = isBahasaKlasik && klasikKind === "istana";
+const isKlasikKind = isBahasaKlasik && klasikKind === "klasik";
+---
+
+<div class="entry-body">
+  {
+    createdAtFormatted && (
+      <p class="entry-added-date">
+        Ditambah pada: {createdAtFormatted}
+      </p>
+    )
+  }
+
+  {
+    isKlasikKind && entry.s_meaning_ms && (
+      <div class="entry-section">
+        <p class="entry-section__label">Bahasa Standard</p>
+        <p class="entry-section__content">{entry.s_meaning_ms}</p>
+      </div>
+    )
+  }
+
+  <div class="entry-section">
+    <p class="entry-section__label">Maksud</p>
+    <p class="entry-section__content">{entry.meaning_ms}</p>
+  </div>
+
+  {
+    entry.example_ms && (
+      <div class="entry-section">
+        <p class="entry-section__label">{isBahasaKlasik ? "Ayat" : "Contoh Ayat"}</p>
+        <div class="entry-example">
+          <p class="entry-example__ms">"{entry.example_ms}"</p>
+        </div>
+      </div>
+    )
+  }
+
+  {
+    isKlasikKind && entry.s_example_ms && (
+      <div class="entry-section">
+        <p class="entry-section__label">Ayat dalam Bahasa Standard</p>
+        <div class="entry-example">
+          <p class="entry-example__ms">"{entry.s_example_ms}"</p>
+        </div>
+      </div>
+    )
+  }
+
+  <div
+    style="
+      display:flex;
+      gap: var(--space-3);
+      align-items:center;
+      padding-top: var(--space-4);
+      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: flex-start;
+    "
+  >
+    <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+      <a href={wordTypeData.url} class="btn btn--secondary btn--sm">
+        &larr; Kembali ke {wordTypeData.label}
+      </a>
+
+      {showBackToAll && (
+        <a href="/kamus" class="btn btn--secondary btn--sm">
+          &larr; Kembali ke Semua
+        </a>
+      )}
+
+      <button
+        class="btn btn--secondary btn--sm"
+        id="copy-btn"
+        data-phrase={entry.phrase}
+        data-meaning={entry.meaning_ms}
+        data-example={entry.example_ms || ""}
+        data-s-meaning={entry.s_meaning_ms || ""}
+        data-s-example={entry.s_example_ms || ""}
+        data-entry-kind={isKlasikKind ? "klasik" : isIstana ? "istana" : "peribahasa"}
+      >
+        ⿻ Salin
+      </button>
+    </div>
+
+    {
+      (navigation.previous || navigation.next) && (
+        <div class="entry-nav">
+          {
+            navigation.previous ? (
+              <a href={navigation.previous.url} class="entry-nav__button entry-nav__button--previous">
+                <span class="entry-nav__label">&larr;</span>
+                <span class="entry-nav__preview">{navigation.previous.preview}</span>
+              </a>
+            ) : (
+              <div class="entry-nav__spacer" aria-hidden="true"></div>
+            )
+          }
+
+          {
+            navigation.next ? (
+              <a href={navigation.next.url} class="entry-nav__button entry-nav__button--next">
+                <span class="entry-nav__label">&rarr;</span>
+                <span class="entry-nav__preview">{navigation.next.preview}</span>
+              </a>
+            ) : (
+              <div class="entry-nav__spacer" aria-hidden="true"></div>
+            )
+          }
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .entry-added-date {
+    margin: 0 0 var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  /* Navigation container */
+  .entry-nav {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: nowrap;
+    width: 100%;
+    margin-top: clamp(2rem, 6vh, 5rem);
+  }
+
+  /* Button + spacer */
+  .entry-nav__button,
+  .entry-nav__spacer {
+    min-height: 3rem;
+  }
+
+  /* Buttons */
+  .entry-nav__button {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: left;
+    text-align: center;
+    gap: 0.3rem;
+    padding: var(--space-4);
+    border-radius: 1rem;
+    border: 1px solid #d3d3d3;
+    background: #ffffff;
+    color: black;
+
+    text-decoration: none;
+    width: fit-content;
+    max-width: 100%;
+
+    transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  }
+
+  .entry-nav__button:hover {
+    transform: translateY(-1px);
+    border-color: #065F46;
+    background: #ffffff;
+    color: #065F46;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .entry-nav__label {
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  .entry-nav__preview {
+    font-size: var(--text-xs);
+    color: black;
+    letter-spacing: 0.04em;
+  }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .entry-nav {
+      gap: var(--space-1);
+    }
+
+    .entry-nav__button {
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--text-xs);
+    }
+
+    .entry-nav__preview {
+      font-size: 10px;
+    }
+  }
+</style>
+
+<script is:inline>
+  const copyBtn = document.getElementById("copy-btn");
+
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      const phrase = copyBtn.dataset.phrase ?? "";
+      const meaning = copyBtn.dataset.meaning ?? "";
+      const example = copyBtn.dataset.example ?? "";
+      const sMeaning = copyBtn.dataset.sMeaning ?? "";
+      const sExample = copyBtn.dataset.sExample ?? "";
+      const entryKind = copyBtn.dataset.entryKind ?? "peribahasa";
+
+      let label = "Peribahasa";
+      if (entryKind === "klasik" || entryKind === "istana") {
+        label = "Bahasa Klasik";
+      }
+
+      const parts = [`${label}: ${phrase}`];
+      if (entryKind === "klasik" && sMeaning) {
+        parts.push(`Bahasa Standard: ${sMeaning}`);
+      }
+      parts.push(`Maksud: ${meaning}`);
+      if (example) {
+        const ayatLabel = entryKind === "peribahasa" ? "Contoh Ayat" : "Ayat";
+        parts.push(`${ayatLabel}: ${example}`);
+      }
+      if (entryKind === "klasik" && sExample) {
+        parts.push(`Ayat dalam Bahasa Standard: ${sExample}`);
+      }
+      parts.push("", "— Sang Bahasa");
+      const text = parts.join("\n");
+
+      navigator.clipboard.writeText(text).then(() => {
+        const original = copyBtn.textContent ?? "";
+        copyBtn.textContent = "🗎 Disalin!";
+
+        setTimeout(() => {
+          copyBtn.textContent = original;
+        }, 2000);
+      }).catch(() => {
+        copyBtn.textContent = "Gagal menyalin";
+      });
+    });
+  }
+</script>

@@ -1,0 +1,399 @@
+---
+export const prerender = true;
+
+import ResultCard from "../components/ResultCard.astro";
+import SearchBar from "../components/SearchBar.astro";
+import type { PeribahasaSummary } from "../config/apiConfig";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { mapRowToSummary } from "../utils/kamus";
+import { getTopTrenDuniaSummaries } from "../utils/trenDunia";
+import {
+  getNewestBahasaKlasik,
+  getNewestPeribahasa,
+  type BahasaKlasikRow,
+  type PeribahasaRow,
+} from "../utils/supabase";
+
+function toHomeCard(
+  row: PeribahasaRow | BahasaKlasikRow,
+  wt: "peribahasa" | "bahasa-klasik"
+): PeribahasaSummary {
+  const m = mapRowToSummary(row, wt);
+  return {
+    id: m.id,
+    phrase: m.phrase,
+    slug: m.slug,
+    meaning_ms: m.meaning_ms,
+    category: m.category,
+    word_type: m.word_type,
+    created_at: m.created_at,
+    _type: m._type,
+  };
+}
+
+let hotTodayEntries: PeribahasaSummary[] = [];
+let newestEntries: PeribahasaSummary[] = [];
+
+try {
+  hotTodayEntries = await getTopTrenDuniaSummaries(5);
+} catch (e) {
+  console.error("Failed to fetch Tren Dunia (tren_dunia):", e);
+}
+
+try {
+  const [np, nk] = await Promise.all([
+    getNewestPeribahasa(12),
+    getNewestBahasaKlasik(12),
+  ]);
+  const merged = [
+    ...np.map((r) => ({ r, w: "peribahasa" as const })),
+    ...nk.map((r) => ({ r, w: "bahasa-klasik" as const })),
+  ].sort((a, b) => {
+    const tb = new Date(b.r.created_at || 0).getTime();
+    const ta = new Date(a.r.created_at || 0).getTime();
+    return tb - ta;
+  });
+  newestEntries = merged.slice(0, 5).map(({ r, w }) => toHomeCard(r, w));
+} catch (e) {
+  console.error("Failed to fetch newest entries:", e);
+}
+---
+
+<BaseLayout
+  title="Sang Bahasa - Kamus Bahasa Melayu"
+  description="Kamus lengkap bahasa Melayu dengan Peribahasa, Simpulan Bahasa, dan Bahasa Klasik. Cari, belajar, dan fahami makna lengkap serta contoh penggunaan yang jelas."
+>
+  <section class="hero">
+    <div class="container">
+      <span class="hero__label">Kamus Bahasa Melayu</span>
+      <h1 class="hero__title">Sang Bahasa</h1>
+      <p class="hero__subtitle">
+        Cari, rujuk, dan fahami koleksi Peribahasa, Simpulan Bahasa dan Bahasa Klasik
+        dengan makna, contoh penggunaan serta keseronokan yang lain.
+      </p>
+
+      <SearchBar hero={true} autofocus={false} wordType="all" />
+    </div>
+  </section>
+ 
+  <section class="section">
+    <div class="container">
+      <div class="section__header">
+        <h2 class="section__title">Tren Dunia Hari Ini</h2>
+        <a href="/kamus" class="section__link" data-astro-prefetch>Lihat semua &rarr;</a>
+      </div>
+      <div class="results-grid" hidden={hotTodayEntries.length === 0}>
+        {hotTodayEntries.map((entry) => (
+          <ResultCard entry={entry} wordType={entry.word_type || "peribahasa"} />
+        ))}
+      </div>
+      <p class="home-empty-note" hidden={hotTodayEntries.length > 0}>
+        Tiada data tren buat hari ini lagi. Klik pada kad entri di laman ini atau di kamus untuk
+        mengira minat — kedudukan disegerakkan merentas peranti melalui pangkalan data.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="container">
+      <div class="section__header">
+        <h2 class="section__title">Yang Terbaharu</h2>
+        <a href="/kamus" class="section__link" data-astro-prefetch>Terokai lebih &rarr;</a>
+      </div>
+
+      <div class="results-grid" hidden={newestEntries.length === 0}>
+        {newestEntries.map((entry) => (
+          <ResultCard entry={entry} wordType={entry.word_type || "peribahasa"} />
+        ))}
+      </div>
+      <p class="home-empty-note" hidden={newestEntries.length > 0}>
+        Belum ada entri terbaharu buat masa ini.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container container--narrow">
+      <div class="promise">
+        <h2 class="section__title" style="text-align:center; margin-bottom:var(--space-10); color:black;">
+          Pegangan <span style="color:#065F46;">Sang Bahasa</span>
+        </h2>
+
+        <div class="promise__stack">
+          <div class="promise-card promise-card--left" data-promise-card>
+            <h3 class="promise-card__title">Ketepatan</h3>
+            <p class="promise-card__desc">
+              Ucap <i>sayonara</i> kepada zaman mencari-cari di serata tempat. Tekad Sang Bahasa adalah untuk menghimpunkan segala maklumat di bawah satu bumbung.
+            </p>
+          </div>
+
+          <div class="promise-card promise-card--right" data-promise-card>
+            <h3 class="promise-card__title">Kemodenan</h3>
+            <p class="promise-card__desc">
+              Semua kandungan dikemas kini dan diperhalusi secara berkala. Sang Bahasa dipantau serta dinaik taraf demi memastikan pengalaman yang lancar dan produktif, khas buat anda.
+            </p>
+          </div>
+
+          <div class="promise-card promise-card--left" data-promise-card>
+            <h3 class="promise-card__title">Dibina dengan 💚</h3>
+            <p class="promise-card__desc">
+              Setiap aspek diurus serta diperkasakan dengan penuh dedikasi. Segala perubahan dan penambahbaikan dilakukan demi menjamin kualiti serta kepuasan yang maksimum.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--bahasamelayu">
+    <div class="container container--narrow" style="text-align:center; padding: 40px 20px;">
+      
+      <h2 class="focus-header" style="
+          margin-bottom: 40px;
+          font-family: Georgia, serif;
+          font-size: var(--text-2xl);
+          font-weight: 700;
+          display: inline-block;
+          position: relative;
+          padding: 20px 40px;
+        ">
+        
+        <span class="corner corner-tl" style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border-top: 2px solid #065F46;
+            border-left: 2px solid #065F46;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s;
+            transform: translate(-30px, -30px); /* Starting position: further out */
+            opacity: 0;
+          "></span>
+
+        <span style="color:#065F46;">Sang Bahasa</span> — Bahasa Melayu Untuk Semua
+
+        <span class="corner corner-br" style="
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            border-bottom: 2px solid #065F46;
+            border-right: 2px solid #065F46;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s;
+            transform: translate(30px, 30px); /* Starting position: further out */
+            opacity: 0;
+          "></span>
+      </h2>
+
+      <button class="btn btn--primary" id="scrollSearchBtn">
+        Jom Mencari
+      </button>
+
+      <p style="margin: var(--space-4) 0; color: var(--color-text-muted);">atau</p>
+
+      <a href="/api/random" class="btn btn--secondary btn--shiny" id="randomEntryBtn" data-random-btn>
+        Cuba Kad Misteri!
+      </a>
+    </div>
+  </section>
+
+  <script>
+    // Handle random entry button click
+    document.addEventListener('DOMContentLoaded', () => {
+      const randomBtn = document.querySelector('[data-random-btn]');
+      
+      if (randomBtn) {
+        randomBtn.addEventListener('click', (e) => {
+          // Set flag in sessionStorage to trigger confetti on destination page
+          sessionStorage.setItem('showConfetti', 'true');
+        });
+      }
+    });
+  </script>
+
+  <style>
+    .home-empty-note {
+      margin: 0;
+      padding: var(--space-6);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      text-align: center;
+      line-height: var(--leading-loose);
+    }
+
+    /* Proper layout container with breathing room */
+    .promise__stack {
+      display: grid;
+      gap: var(--space-6); /* Space between cards */
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 var(--space-6); /* Side padding for the stack itself */
+    }
+
+    .promise {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-12) 0; /* Vertical breathing room for section */
+    }
+
+    .promise-card {
+      width: 100%; 
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface);
+      /* ✅ Key Fix: Large internal padding */
+      padding: var(--space-8) var(--space-10); 
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+
+      opacity: 0;
+      transform: translateX(-32px);
+      transition: transform 700ms cubic-bezier(.2,.9,.2,1), opacity 700ms ease;
+      will-change: transform, opacity;
+    }
+
+    .promise-card--right {
+      transform: translateX(32px);
+    }
+
+    .promise-card.is-visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .promise-card__title {
+      margin: 0 0 var(--space-3);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-primary-dark);
+    }
+
+    .promise-card__desc {
+      margin: 0;
+      color: var(--color-text-muted);
+      line-height: 1.7; /* Better readability */
+      font-size: var(--text-base);
+    }
+
+    @media (max-width: 640px) {
+      .promise-card {
+        padding: var(--space-6); /* Slightly smaller on mobile */
+      }
+    }
+
+    .focus-header.is-visible .corner {
+      transform: translate(0, 0) !important;
+      opacity: 1 !important;
+    }
+
+    /* Add this to your <style> tag */
+    /* Base transition for all cards */
+  [data-promise-card] {
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease, opacity 0.6s ease-out;
+    }
+
+    /* 1st Card: Shift Top-Right */
+    .promise-card:nth-child(1):hover {
+      transform: translate(12px, -12px) !important;
+      box-shadow: -10px 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 2nd Card: Shift Top-Left */
+    .promise-card:nth-child(2):hover {
+      transform: translate(-12px, -12px) !important;
+      box-shadow: 10px 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 3rd Card: Shift Top-Right */
+    .promise-card:nth-child(3):hover {
+      transform: translate(12px, -12px) !important;
+      box-shadow: -10px 10px 25px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+
+  <script is:inline>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("scrollSearchBtn");
+
+      btn?.addEventListener("click", () => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+
+        const focusSearch = () => {
+          const input = document.querySelector("[data-search-root] input");
+
+          if (input) {
+            input.focus({ preventScroll: true });
+          }
+        };
+
+        setTimeout(focusSearch, 500);
+      });
+
+      const cards = document.querySelectorAll("[data-promise-card]");
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const card = entry.target;
+              const index = Array.from(cards).indexOf(card);
+              setTimeout(() => {
+                card.classList.add("is-visible");
+              }, index * 150);
+              observer.unobserve(card);
+            }
+          });
+        },
+        {
+          threshold: 0.2,
+        }
+      );
+
+      cards.forEach((card) => observer.observe(card));
+
+      const randomBtn = document.getElementById("randomEntryBtn");
+      randomBtn?.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        try {
+          const response = await fetch("/api/random");
+          const data = await response.json();
+
+          if (data.url) {
+            window.location.href = data.url;
+          } else {
+            alert("Tidak dapat mencari entri rawak. Sila cuba lagi.");
+          }
+        } catch (error) {
+          console.error("Error fetching random entry:", error);
+          alert("Tidak dapat mencari entri rawak. Sila cuba lagi.");
+        }
+      });
+    });
+  </script>
+
+  <script>
+    const observerOptions = {
+      threshold: 0.5 // Triggers when 50% of the header is visible
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, observerOptions);
+
+    // Target the header
+    const target = document.querySelector('.focus-header');
+    if (target) observer.observe(target);
+  </script>
+
+</BaseLayout>

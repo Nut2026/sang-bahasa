@@ -1,0 +1,134 @@
+---
+import type { PeribahasaSummary } from "../config/apiConfig";
+import { getEntryUrl } from "../config/routes";
+import {
+  buildCategoryFilterHref,
+  buildTypeFilterHref,
+  formatEntryTypeDisplayLabel,
+  formatMalayLabel,
+  getListingPathForWordType,
+} from "../utils/kamus";
+
+interface Props {
+  entry: PeribahasaSummary;
+  /** @deprecated Prefer `entry.word_type` */
+  wordType?: string;
+}
+
+const { entry, wordType: wordTypeProp } = Astro.props;
+
+const wordType = entry.word_type || wordTypeProp || "peribahasa";
+const listingPath = getListingPathForWordType(
+  wordType === "bahasa-klasik" ? "bahasa-klasik" : "peribahasa"
+);
+const typeLabel = formatEntryTypeDisplayLabel(entry._type, wordType);
+const categoryLabel = formatMalayLabel(entry.category);
+const entryUrl = getEntryUrl(wordType, entry.slug);
+const typeHref = buildTypeFilterHref(listingPath, entry._type);
+const categoryHref = buildCategoryFilterHref(listingPath, entry.category);
+
+const entryTags = Array.isArray(entry.tags) ? entry.tags : [];
+---
+
+<div class="result-card">
+  <a
+    href={entryUrl}
+    class="result-card__overlay"
+    aria-label={`Buka entri: ${entry.phrase}`}
+    data-tren-card="1"
+    data-tren-word-type={wordType}
+    data-tren-entry-slug={entry.slug}
+  >
+    <span class="sr-only">{entry.phrase}</span>
+  </a>
+  <div class="result-card__body">
+    <div class="result-card__header">
+      <div class="result-card__phrase">{entry.phrase}</div>
+      <div class="result-card__title-labels">
+        <a
+          href={typeHref}
+          class="result-card__label result-card__label--type result-card__label--link"
+          data-astro-prefetch
+        >
+          {typeLabel}
+        </a>
+        <a
+          href={categoryHref}
+          class="result-card__label result-card__label--category result-card__label--link"
+          data-astro-prefetch
+        >
+          {categoryLabel}
+        </a>
+      </div>
+    </div>
+    <div class="result-card__divider"></div>
+    <p class="result-card__meaning">{entry.meaning_ms}</p>
+    {entryTags.length > 0 && (
+      <div class="result-card__tags">
+        {entryTags.slice(0, 3).map((tag) => (
+          <span class="result-card__tag">{formatMalayLabel(tag)}</span>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .result-card {
+    position: relative;
+    display: block;
+  }
+
+  .result-card__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: var(--radius-lg);
+  }
+
+  .result-card__body {
+    position: relative;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .result-card__title-labels a {
+    pointer-events: auto;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .result-card__title-labels a:hover {
+    filter: brightness(0.92);
+  }
+
+  .result-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .result-card__tag {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+  }
+</style>

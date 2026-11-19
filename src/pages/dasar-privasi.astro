@@ -1,0 +1,73 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Dasar Privasi"
+  description="Dasar privasi Sang Bahasa menerangkan data yang dikumpul dan cara ia digunakan apabila anda menggunakan tapak ini."
+>
+  <article class="static-page">
+    <div class="container container--narrow">
+      <h1 class="static-page__title">Dasar Privasi</h1>
+      <div class="static-page__body">
+        <p>
+          Kami amat menghargai privasi anda. Dasar ringkas ini menerangkan apa yang berlaku apabila
+          anda melawati <strong>Sang Bahasa</strong>.
+        </p>
+        <h2>Data yang kami proses</h2>
+        <ul>
+          <li>
+            <strong>Log pelayan &amp; analitik:</strong> Pembekal pengehosan atau perkhidmatan
+            analitik (contohnya alat analitik tapak) mungkin merekod alamat IP, jenis pelayar,
+            dan halaman yang dilawati. Data ini digunakan untuk memahami trafik dan mengekalkan
+            keselamatan tapak.
+          </li>
+          <li>
+            <strong>Interaksi kamus:</strong> Untuk ciri seperti &ldquo;Tren Dunia Hari Ini&rdquo;,
+            kami mungkin merekod pengenal entri (contohnya jenis kamus dan slug entri) dan kiraan
+            lawatan tanpa mengumpul nama akaun atau log masuk pengguna.
+          </li>
+          <li>
+            <strong>Kuki &amp; storan setempat:</strong> Tapak mungkin menggunakan storan pelayar
+            untuk fungsi asas (contohnya pengalaman carian) atau melalui pembekal pihak ketiga
+            seperti pengiklan jika disepadukan.
+          </li>
+        </ul>
+        <h2>Pautan luar</h2>
+        <p>
+          Sang Bahasa mungkin memaut ke tapak luar. Dasar privasi mereka terpakai apabila anda
+          meninggalkan tapak kami.
+        </p>
+        <h2>Perubahan Pada Dasar Privasi Ini</h2>
+        <p>
+          Kami berhak mengubah suai dasar privasi ini pada bila-bila masa. Penggunaan berterusan tapak ini selepas perubahan 
+          menunjukkan penerimaan anda terhadap dasar privasi yang dikemaskini. Kami berusaha untuk memaklumkan sebarang perubahan pada dasar privasi ini kepada anda.
+        </p>
+        <h2>Soalan Tentang Dasar Privasi Ini</h2>
+        <p>
+          Untuk soalan privasi atau melaksanakan hak anda, sila <a href="/hubungi-kami">hubungi kami</a>.
+        </p>
+        <!-- Grey line and date -->
+        <hr class="privacy-divider" />
+        <p class="privacy-date">
+          <time datetime="2024-01-01">Tarikh semakan: 4 Mei 2026</time>
+        </p>
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style is:global>
+  .privacy-divider {
+    margin: 2rem 0 1rem 0;
+    border: none;
+    border-top: 1px solid #d3d3d3;
+  }
+  
+  .privacy-date {
+    font-size: 0.8rem;
+    color: #9c9188;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    margin-top: 0.5rem;
+  }
+</style>
