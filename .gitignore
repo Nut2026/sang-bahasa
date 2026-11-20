@@ -1,20 +1,30 @@
+# Dependencies
 node_modules/
 .pnpm-store/
 
+# Astro
+.astro/
+src/env.d.ts
+
+# Build outputs
 dist/
 build/
 out/
-.astro/
+
+# Vercel
 .vercel/
 
+# Environment variables
 .env
 .env.*
 !.env.example
 
+# OS files
 .DS_Store
 Thumbs.db
 desktop.ini
 
+# Logs
 logs/
 *.log
 npm-debug.log*
@@ -22,18 +32,27 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# IDE
 .vscode/
 !.vscode/extensions.json
 !.vscode/settings.json
+.freebuff/
 .idea/
 *.swp
 *.swo
 *~
 
+# Cache
 .cache/
 .parcel-cache/
-docs/
+.vite/
+*.tsbuildinfo
 
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
 *.bak
 *.tmp
 *.temp
