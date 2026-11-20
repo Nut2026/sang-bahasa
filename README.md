@@ -7,6 +7,10 @@
 [![Backend: Supabase](https://img.shields.io/badge/Backend-Supabase-3ECF8E.svg?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Dihoskan di Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000.svg?style=flat-square&logo=vercel&logoColor=white)](https://vercel.com/)
 
+**[Kunjungi Laman Web](https://sang-bahasa.vercel.app)**
+
+![Sang Bahasa Thumbnail](public/sang-bahasa-thumbnail.png)
+
 ## Tentang Sang Bahasa
 
 Sang Bahasa ialah kamus peribahasa dan bahasa klasik Melayu yang memfokuskan carian pantas, paparan yang kemas, dan kandungan sepenuhnya dalam Bahasa Melayu. Setiap entri bukan sekadar senarai maksud - ia datang dengan contoh ayat, kategori, entri berkaitan dan laluan bacaan yang membolehkan anda terus melompat dari satu peribahasa ke peribahasa yang lain.
